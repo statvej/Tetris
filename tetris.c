@@ -1,11 +1,14 @@
 #include <ncurses.h>
 #include <unistd.h>
-
+#include <stdlib.h>
 #define WIDTH 40
 #define HEIGHT 20
-#define DROP_SPEED 1000000
+// #define DROP_SPEED 1000000
 int position = 0;
 int position_up = 0;
+int time_index = 0;
+int fig_count = 0;
+
 struct s_coord
 {
     int row;
@@ -31,20 +34,15 @@ typedef struct s_figure
     int thicc;
 } t_figure;
 
-int kbhit(void)
+typedef struct s_bottom_blocks_coord
 {
-    int ch = getch();
+    int *x;
+    int *y;
+    t_figure *bottom_figs;
+} t_bottom_blocks_coord;
 
-    if (ch != ERR)
-    {
-        ungetch(ch);
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
+t_figure current_figure;
+t_bottom_blocks_coord bottom_blocks;
 
 void playground()
 {
@@ -74,10 +72,25 @@ void playground()
     mvaddch(HEIGHT, WIDTH - 1, '/');
 }
 
-t_figure *figure_printer(t_figure block, int input)
+int figure_printer(t_figure block, int input, int level)
 {
-    t_figure *current;
-    
+    //color pairs
+    init_pair(1, COLOR_YELLOW, COLOR_YELLOW); //For O-Block
+    init_pair(2, COLOR_CYAN, COLOR_CYAN);     // for I-BLOCK
+    if (time_index >= level)
+    {
+        time_index = 0;
+        if (position_up < HEIGHT - 2)
+        {
+            ++position_up;
+        }
+        else
+        {
+            position_up = HEIGHT - 2;
+            return 0;
+        }
+    }
+
     switch (input) //input calculation with taking into account playground limits
     {
     case 'a':
@@ -100,9 +113,10 @@ t_figure *figure_printer(t_figure block, int input)
     block.width3 = block.width3 + position - 1;
     block.width4 = block.width4 + position - 1;
 
-    //color pairs
-    init_pair(1, COLOR_YELLOW, COLOR_YELLOW); //For O-Block
-    init_pair(2, COLOR_CYAN, COLOR_CYAN);     // for I-BLOCK
+    block.height1 = block.height1 + position_up;
+    block.height2 = block.height2 + position_up;
+    block.height3 = block.height3 + position_up;
+    block.height4 = block.height4 + position_up;
 
     attron(COLOR_PAIR(block.color_pair)); //printing fase
     mvprintw(block.height1, block.width1, "  ");
@@ -110,13 +124,41 @@ t_figure *figure_printer(t_figure block, int input)
     mvprintw(block.height3, block.width3, "  ");
     mvprintw(block.height4, block.width4, "  ");
     attroff(COLOR_PAIR(block.color_pair));
-    return current;
+    return 1;
 }
-int main()
+
+void bottom_printer(t_figure tetromino)
 {
-    int ch;
-    t_figure *current_blocks;
-    t_figure o_block; //O-BLOCK parameters
+    int count = 0;
+    ++fig_count;
+    bottom_blocks.bottom_figs[fig_count] = tetromino;
+    bottom_blocks.x[fig_count] = position;
+    bottom_blocks.y[fig_count] = position_up;
+    while (count < fig_count)
+    {
+        bottom_blocks.bottom_figs[count].width1 = bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1;
+        bottom_blocks.bottom_figs[count].width2 = bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1;
+        bottom_blocks.bottom_figs[count].width3 = bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1;
+        bottom_blocks.bottom_figs[count].width4 = bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1;
+
+        bottom_blocks.bottom_figs[count].height1 = bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count];
+        bottom_blocks.bottom_figs[count].height2 = bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count];
+        bottom_blocks.bottom_figs[count].height3 = bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count];
+        bottom_blocks.bottom_figs[count].height4 = bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count];
+        attron(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair)); //printing fase
+        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
+        attroff(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair));
+        ++count;
+    }
+}
+t_figure rnd_figure()
+{
+    t_figure null_block; //NULL-BLOCK for error returning
+
+    t_figure o_block; //O-BLOCK parameters     /* COLOR PAIR IS ALSO BLOCK NUMBER IN RANDOMIZER */
     o_block.color_pair = 1;
     o_block.height1 = 1;
     o_block.height2 = 1;
@@ -138,20 +180,58 @@ int main()
     i_block.width3 = WIDTH / 2 + 2;
     i_block.width4 = WIDTH / 2 + 4;
     i_block.thicc = 8;
-    t_figure pp[5];
+
+    int random = rand() % 2;
+
+    switch (random)
+    {
+    case 0:
+        return o_block;
+        break;
+    case 1:
+        return i_block;
+    default:
+        break;
+    }
+    return null_block;
+}
+int main()
+{
+    int ch;
+    int random_checker;
+    int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 30000};
+    int level = 1;
+    t_figure temp;
+
+    current_figure = rnd_figure();
     initscr();
     keypad(stdscr, TRUE);
     raw();
     curs_set(0);
-
+    nodelay(stdscr, TRUE);
     start_color();
 
     while (ch != 27)
     {
-        ch = getchar();
-        playground();
-        current_blocks = figure_printer(i_block, ch);
+        int time_counter = 0;
+        ch = getch();
 
+        playground();
+        random_checker = figure_printer(current_figure, ch, level_arr[level]);
+        if (random_checker != 1)
+        {
+            bottom_printer(current_figure);
+            current_figure = rnd_figure();
+            position_up = 0;
+            position = 0;
+            random_checker = figure_printer(current_figure, ch, level_arr[level]);
+        }
+        while (time_counter <= 1)
+        {
+            usleep(10);
+            ++time_index;
+            ++time_counter;
+        }
         refresh();
     }
     endwin();
