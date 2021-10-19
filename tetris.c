@@ -31,6 +31,21 @@ typedef struct s_figure
     int thicc;
 } t_figure;
 
+int kbhit(void)
+{
+    int ch = getch();
+
+    if (ch != ERR)
+    {
+        ungetch(ch);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 void playground()
 {
     int count_h = 0;
@@ -43,7 +58,7 @@ void playground()
         while (count_w < WIDTH - 1)
         {
 
-            mvaddch(count_h, count_w, ':');
+            mvaddch(count_h, count_w, ' ');
             ++count_w;
         }
         mvaddch(count_h, count_w, '|');
@@ -62,6 +77,7 @@ void playground()
 t_figure *figure_printer(t_figure block, int input)
 {
     t_figure *current;
+    
     switch (input) //input calculation with taking into account playground limits
     {
     case 'a':
@@ -135,10 +151,8 @@ int main()
         ch = getchar();
         playground();
         current_blocks = figure_printer(i_block, ch);
- 
-        refresh();
-       
-    }
 
+        refresh();
+    }
     endwin();
 }
