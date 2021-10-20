@@ -77,10 +77,29 @@ void playground()
     mvaddch(HEIGHT, WIDTH - 1, '/');
 }
 
-bool botom_colision_checker(t_figure check){
-if()
-
-return FALSE;
+bool botom_colision_checker(t_figure check)
+{
+    int count = 0;
+    while ()
+    {
+        if (bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
+        {
+            return TRUE;
+        }
+        else if (bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
+        {
+            return TRUE;
+        }
+        else if (bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
+        {
+            return TRUE;
+        }
+        else if (bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
+        {
+            return TRUE;
+        }
+        return FALSE;
+    }
 }
 
 int figure_printer(t_figure block, int input, int level)
@@ -95,8 +114,9 @@ int figure_printer(t_figure block, int input, int level)
         {
             ++position_up;
         }
-        else if(botom_colision_checker(block)){
-            
+        else if (botom_colision_checker(block) == 1)
+        {
+
             return 0;
         }
         else
@@ -141,6 +161,7 @@ int figure_printer(t_figure block, int input, int level)
     attroff(COLOR_PAIR(block.color_pair));
     return 1;
 }
+
 void bottom_adder(t_figure tetromino)
 {
     bottom_blocks.bottom_figs[fig_count] = tetromino;
@@ -148,6 +169,7 @@ void bottom_adder(t_figure tetromino)
     bottom_blocks.y[fig_count] = position_up;
     ++fig_count;
 }
+
 void bottom_printer()
 {
     int count = 0;
@@ -167,6 +189,7 @@ void bottom_printer()
         ++count;
     }
 }
+
 t_figure rnd_figure()
 {
     t_figure null_block; //NULL-BLOCK for error returning
@@ -183,7 +206,7 @@ t_figure rnd_figure()
     o_block.width4 = WIDTH / 2;
     o_block.thicc = 4;
     o_block.high = 2;
-    o_block.bottom = {0, 0};
+    o_block.bottom;
     t_figure i_block; //I-BLOCK parameters
     i_block.color_pair = 2;
     i_block.height1 = 1;
@@ -210,6 +233,7 @@ t_figure rnd_figure()
     }
     return null_block;
 }
+
 int main()
 {
     int ch;
@@ -242,7 +266,7 @@ int main()
             random_checker = figure_printer(current_figure, ch, level_arr[level]);
         }
         bottom_printer();
-       
+
         while (time_counter <= 1)
         {
             usleep(10);
