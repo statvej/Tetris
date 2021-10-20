@@ -11,11 +11,11 @@ int time_index = 0;
 int fig_count = 0;
 int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
 
-struct s_coord
-{
-    int row;
-    int column;
-};
+// typedef struct s_coord
+// {
+//     int x[19];
+//     int y[19];
+// } t_coord;
 
 typedef struct s_figure
 {
@@ -45,7 +45,8 @@ typedef struct s_bottom_blocks_coord
     int y[100];
     t_figure bottom_figs[100];
 } t_bottom_blocks_coord;
-
+// t_coord colision;
+int relief_y[19];
 t_figure current_figure;
 t_bottom_blocks_coord bottom_blocks;
 
@@ -77,30 +78,42 @@ void playground()
     mvaddch(HEIGHT, WIDTH - 1, '/');
 }
 
-bool botom_colision_checker(t_figure check)
+void get_relief()
 {
-    int count = 0;
-    while ()
+    int count_w = 0;
+    int count_h = 0;
+    int ch = 32;
+    while (count_w < 38)
     {
-        if (bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
+
+        while (0)
         {
-            return TRUE;
+            ch = mvinch(count_h, count_w + 1);
+            if (ch == '_')
+            {
+                count_h--;
+                break;
+            }
+            if (ch == '@')
+            {
+                count_h--;
+                break;
+            }
+            count_h++;
         }
-        else if (bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
-        {
-            return TRUE;
-        }
-        else if (bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
-        {
-            return TRUE;
-        }
-        else if (bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high == check.height1)
-        {
-            return TRUE;
-        }
-        return FALSE;
+        relief_y[count_w] = count_h;
+        count_w++;
     }
 }
+// void botom_colision_counter()
+// {
+//     int temp_thicc = current_figure.thicc;
+//     int temp_high = current_figure.high;
+//     for (int i = 0; i < temp_thicc / 2; i++)
+//     {
+//         colision_y[(position / 2) - 8 + i] = ;
+//     }
+// }
 
 int figure_printer(t_figure block, int input, int level)
 {
@@ -114,11 +127,11 @@ int figure_printer(t_figure block, int input, int level)
         {
             ++position_up;
         }
-        else if (botom_colision_checker(block) == 1)
-        {
+        // else if (botom_colision_checker(block) == 1)
+        // {
 
-            return 0;
-        }
+        //     return 0;
+        // }
         else
         {
             position_up = HEIGHT - 2;
@@ -154,10 +167,10 @@ int figure_printer(t_figure block, int input, int level)
     block.height4 = block.height4 + position_up - block.high + 1;
 
     attron(COLOR_PAIR(block.color_pair)); //printing fase
-    mvprintw(block.height1, block.width1, "  ");
-    mvprintw(block.height2, block.width2, "  ");
-    mvprintw(block.height3, block.width3, "  ");
-    mvprintw(block.height4, block.width4, "  ");
+    mvprintw(block.height1, block.width1, "@@");
+    mvprintw(block.height2, block.width2, "@@");
+    mvprintw(block.height3, block.width3, "@@");
+    mvprintw(block.height4, block.width4, "@@");
     attroff(COLOR_PAIR(block.color_pair));
     return 1;
 }
@@ -180,10 +193,10 @@ void bottom_printer()
     {
         attron(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair)); //printing fase
 
-        mvprintw(bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1, "  ");
-        mvprintw(bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1, "  ");
-        mvprintw(bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1, "  ");
-        mvprintw(bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1, "@@");
+        mvprintw(bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1, "@@");
+        mvprintw(bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1, "@@");
+        mvprintw(bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1, "@@");
 
         attroff(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair));
         ++count;
@@ -206,7 +219,7 @@ t_figure rnd_figure()
     o_block.width4 = WIDTH / 2;
     o_block.thicc = 4;
     o_block.high = 2;
-    o_block.bottom;
+
     t_figure i_block; //I-BLOCK parameters
     i_block.color_pair = 2;
     i_block.height1 = 1;
@@ -256,10 +269,12 @@ int main()
         ch = getch();
 
         playground();
+        get_relief();
         random_checker = figure_printer(current_figure, ch, level_arr[level]);
         if (random_checker != 1)
         {
             bottom_adder(current_figure);
+
             current_figure = rnd_figure();
             position_up = 0;
             position = 0;
@@ -267,6 +282,8 @@ int main()
         }
         bottom_printer();
 
+        mvprintw(20, 20, "%d", position);
+        mvprintw(10, 10, "%d", relief_y[0]);
         while (time_counter <= 1)
         {
             usleep(10);
@@ -279,3 +296,4 @@ int main()
     endwin();
     return fig_count;
 }
+
