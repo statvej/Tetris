@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #define WIDTH 40
 #define HEIGHT 20
 // #define DROP_SPEED 1000000
@@ -8,6 +9,7 @@ int position = 0;
 int position_up = 0;
 int time_index = 0;
 int fig_count = 0;
+int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
 
 struct s_coord
 {
@@ -32,13 +34,16 @@ typedef struct s_figure
     int height4;
 
     int thicc;
+    int high;
+
+    int bottom[4];
 } t_figure;
 
 typedef struct s_bottom_blocks_coord
 {
-    int *x;
-    int *y;
-    t_figure *bottom_figs;
+    int x[100];
+    int y[100];
+    t_figure bottom_figs[100];
 } t_bottom_blocks_coord;
 
 t_figure current_figure;
@@ -72,6 +77,12 @@ void playground()
     mvaddch(HEIGHT, WIDTH - 1, '/');
 }
 
+bool botom_colision_checker(t_figure check){
+if()
+
+return FALSE;
+}
+
 int figure_printer(t_figure block, int input, int level)
 {
     //color pairs
@@ -83,6 +94,10 @@ int figure_printer(t_figure block, int input, int level)
         if (position_up < HEIGHT - 2)
         {
             ++position_up;
+        }
+        else if(botom_colision_checker(block)){
+            
+            return 0;
         }
         else
         {
@@ -113,10 +128,10 @@ int figure_printer(t_figure block, int input, int level)
     block.width3 = block.width3 + position - 1;
     block.width4 = block.width4 + position - 1;
 
-    block.height1 = block.height1 + position_up;
-    block.height2 = block.height2 + position_up;
-    block.height3 = block.height3 + position_up;
-    block.height4 = block.height4 + position_up;
+    block.height1 = block.height1 + position_up - block.high + 1;
+    block.height2 = block.height2 + position_up - block.high + 1;
+    block.height3 = block.height3 + position_up - block.high + 1;
+    block.height4 = block.height4 + position_up - block.high + 1;
 
     attron(COLOR_PAIR(block.color_pair)); //printing fase
     mvprintw(block.height1, block.width1, "  ");
@@ -126,30 +141,28 @@ int figure_printer(t_figure block, int input, int level)
     attroff(COLOR_PAIR(block.color_pair));
     return 1;
 }
-
-void bottom_printer(t_figure tetromino)
+void bottom_adder(t_figure tetromino)
 {
-    int count = 0;
-    ++fig_count;
     bottom_blocks.bottom_figs[fig_count] = tetromino;
     bottom_blocks.x[fig_count] = position;
     bottom_blocks.y[fig_count] = position_up;
+    ++fig_count;
+}
+void bottom_printer()
+{
+    int count = 0;
+    //color pairs
+    init_pair(1, COLOR_YELLOW, COLOR_YELLOW); //For O-Block
+    init_pair(2, COLOR_CYAN, COLOR_CYAN);     // for I-BLOCK
     while (count < fig_count)
     {
-        bottom_blocks.bottom_figs[count].width1 = bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1;
-        bottom_blocks.bottom_figs[count].width2 = bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1;
-        bottom_blocks.bottom_figs[count].width3 = bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1;
-        bottom_blocks.bottom_figs[count].width4 = bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1;
-
-        bottom_blocks.bottom_figs[count].height1 = bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count];
-        bottom_blocks.bottom_figs[count].height2 = bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count];
-        bottom_blocks.bottom_figs[count].height3 = bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count];
-        bottom_blocks.bottom_figs[count].height4 = bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count];
         attron(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair)); //printing fase
-        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
-        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
-        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
-        mvprintw(bottom_blocks.bottom_figs[count].height1, bottom_blocks.bottom_figs[count].width1, "  ");
+
+        mvprintw(bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1, "  ");
+        mvprintw(bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1, "  ");
+
         attroff(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair));
         ++count;
     }
@@ -169,6 +182,8 @@ t_figure rnd_figure()
     o_block.width3 = WIDTH / 2 - 2;
     o_block.width4 = WIDTH / 2;
     o_block.thicc = 4;
+    o_block.high = 2;
+    o_block.bottom = {0, 0};
     t_figure i_block; //I-BLOCK parameters
     i_block.color_pair = 2;
     i_block.height1 = 1;
@@ -180,7 +195,7 @@ t_figure rnd_figure()
     i_block.width3 = WIDTH / 2 + 2;
     i_block.width4 = WIDTH / 2 + 4;
     i_block.thicc = 8;
-
+    i_block.high = 1;
     int random = rand() % 2;
 
     switch (random)
@@ -199,8 +214,8 @@ int main()
 {
     int ch;
     int random_checker;
-    int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 30000};
-    int level = 1;
+
+    int level = 9;
     t_figure temp;
 
     current_figure = rnd_figure();
@@ -220,12 +235,14 @@ int main()
         random_checker = figure_printer(current_figure, ch, level_arr[level]);
         if (random_checker != 1)
         {
-            bottom_printer(current_figure);
+            bottom_adder(current_figure);
             current_figure = rnd_figure();
             position_up = 0;
             position = 0;
             random_checker = figure_printer(current_figure, ch, level_arr[level]);
         }
+        bottom_printer();
+       
         while (time_counter <= 1)
         {
             usleep(10);
@@ -233,6 +250,8 @@ int main()
             ++time_counter;
         }
         refresh();
+        bottom_printer();
     }
     endwin();
+    return fig_count;
 }
