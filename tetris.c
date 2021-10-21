@@ -9,7 +9,7 @@ int position = 0;
 int position_up = 0;
 int time_index = 0;
 int fig_count = 0;
-int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
+int level_arr[10] = {0, 100, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
 
 // typedef struct s_coord
 // {
@@ -41,12 +41,12 @@ typedef struct s_figure
 
 typedef struct s_bottom_blocks_coord
 {
-    int x[100];
-    int y[100];
-    t_figure bottom_figs[100];
+    int x[1000];
+    int y[1000];
+    t_figure bottom_figs[1000];
 } t_bottom_blocks_coord;
 // t_coord colision;
-int relief_y[19];
+int relief_y[38];
 t_figure current_figure;
 t_bottom_blocks_coord bottom_blocks;
 
@@ -78,42 +78,71 @@ void playground()
     mvaddch(HEIGHT, WIDTH - 1, '/');
 }
 
-void get_relief()
-{
-    int count_w = 0;
-    int count_h = 0;
-    int ch = 32;
-    while (count_w < 38)
-    {
-
-        while (0)
-        {
-            ch = mvinch(count_h, count_w + 1);
-            if (ch == '_')
-            {
-                count_h--;
-                break;
-            }
-            if (ch == '@')
-            {
-                count_h--;
-                break;
-            }
-            count_h++;
-        }
-        relief_y[count_w] = count_h;
-        count_w++;
-    }
-}
-// void botom_colision_counter()
+// void get_relief()
 // {
-//     int temp_thicc = current_figure.thicc;
-//     int temp_high = current_figure.high;
-//     for (int i = 0; i < temp_thicc / 2; i++)
+//     int count_w = 0;
+//     int count_h = 0;
+//     int ch = ' ';
+//     while (count_w < 38)
 //     {
-//         colision_y[(position / 2) - 8 + i] = ;
+
+//         while (ch == ' ')
+//         {
+//             ch = mvinch(count_h, count_w + 1);
+//             if (ch == 'O')
+//             {
+
+//                 relief_y[count_w] = count_h - 2;
+//                 exit(0);
+//             }
+//             else if (ch == '_')
+//             {
+
+//                 relief_y[count_w] = count_h - 1;
+//             }
+
+//             count_h++;
+//             relief_y[count_w] = count_h - 2;
+//         }
+
+//         count_w++;
 //     }
 // }
+
+int get_relief(int count_w)
+{
+
+    int count_h = 19;
+    int ch = mvinch(count_h, count_w);
+    if (ch == ' ')
+    {
+        relief_y[count_w] = 19;
+    }
+    else
+    {
+        while (ch > 250)
+        {
+            count_h = count_h - 1;
+            ch = mvinch(count_h, count_w + 1);
+        }
+    }
+    mvprintw(20, 20, "%d", count_w);
+
+    return count_h;
+}
+
+bool colision()
+{
+    int x1 = current_figure.width1 + position - 1;
+    int x2 = current_figure.width2 + position - 1;
+    int x3 = current_figure.width3 + position - 1;
+    int x4 = current_figure.width4 + position - 1;
+    int y1 = current_figure.height1 + position_up - current_figure.high + 1;
+    int y2 = current_figure.height2 + position_up - current_figure.high + 1;
+    int y3 = current_figure.height3 + position_up - current_figure.high + 1;
+    int y4 = current_figure.height4 + position_up - current_figure.high + 1;
+
+}
 
 int figure_printer(t_figure block, int input, int level)
 {
@@ -127,9 +156,9 @@ int figure_printer(t_figure block, int input, int level)
         {
             ++position_up;
         }
-        // else if (botom_colision_checker(block) == 1)
+        // else if (colision == 1)
         // {
-
+        //
         //     return 0;
         // }
         else
@@ -193,10 +222,10 @@ void bottom_printer()
     {
         attron(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair)); //printing fase
 
-        mvprintw(bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1, "@@");
-        mvprintw(bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1, "@@");
-        mvprintw(bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1, "@@");
-        mvprintw(bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1, "@@");
+        mvprintw(bottom_blocks.bottom_figs[count].height1 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width1 + bottom_blocks.x[count] - 1, "66");
+        mvprintw(bottom_blocks.bottom_figs[count].height2 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width2 + bottom_blocks.x[count] - 1, "66");
+        mvprintw(bottom_blocks.bottom_figs[count].height3 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width3 + bottom_blocks.x[count] - 1, "66");
+        mvprintw(bottom_blocks.bottom_figs[count].height4 + bottom_blocks.y[count] - bottom_blocks.bottom_figs[count].high + 1, bottom_blocks.bottom_figs[count].width4 + bottom_blocks.x[count] - 1, "66");
 
         attroff(COLOR_PAIR(bottom_blocks.bottom_figs[count].color_pair));
         ++count;
@@ -252,7 +281,7 @@ int main()
     int ch;
     int random_checker;
 
-    int level = 9;
+    int level = 1;
     t_figure temp;
 
     current_figure = rnd_figure();
@@ -269,7 +298,7 @@ int main()
         ch = getch();
 
         playground();
-        get_relief();
+
         random_checker = figure_printer(current_figure, ch, level_arr[level]);
         if (random_checker != 1)
         {
@@ -282,8 +311,7 @@ int main()
         }
         bottom_printer();
 
-        mvprintw(20, 20, "%d", position);
-        mvprintw(10, 10, "%d", relief_y[0]);
+        mvprintw(10, 10, "%d", get_relief(1));
         while (time_counter <= 1)
         {
             usleep(10);
@@ -291,7 +319,6 @@ int main()
             ++time_counter;
         }
         refresh();
-        bottom_printer();
     }
     endwin();
     return fig_count;
