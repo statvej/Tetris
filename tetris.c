@@ -9,7 +9,7 @@ int position = 0;
 int position_up = 0;
 int time_index = 0;
 int fig_count = 0;
-int level_arr[10] = {0, 100, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
+int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
 
 // typedef struct s_coord
 // {
@@ -126,12 +126,11 @@ int get_relief(int count_w)
             ch = mvinch(count_h, count_w + 1);
         }
     }
-    mvprintw(20, 20, "%d", count_w);
 
     return count_h;
 }
 
-bool colision()
+int colision()
 {
     int x1 = current_figure.width1 + position - 1;
     int x2 = current_figure.width2 + position - 1;
@@ -141,11 +140,86 @@ bool colision()
     int y2 = current_figure.height2 + position_up - current_figure.high + 1;
     int y3 = current_figure.height3 + position_up - current_figure.high + 1;
     int y4 = current_figure.height4 + position_up - current_figure.high + 1;
+    if (y1 == get_relief(x1) + 1)
+    {
+        return 1;
+    }
+    if (y1 == get_relief(x2) + 1)
+    {
+        return 1;
+    }
+    if (y1 == get_relief(x3) + 1)
+    {
+        return 1;
+    }
+    if (y1 == get_relief(x4) + 1)
+    {
+        return 1;
+    }
 
+    if (y2 == get_relief(x1) + 1)
+    {
+        return 1;
+    }
+    if (y2 == get_relief(x2) + 1)
+    {
+        return 1;
+    }
+    if (y2 == get_relief(x3) + 1)
+    {
+        return 1;
+    }
+    if (y2 == get_relief(x4) + 1)
+    {
+        return 1;
+    }
+
+    if (y3 == get_relief(x1) + 1)
+    {
+        return 1;
+    }
+    if (y3 == get_relief(x2) + 1)
+    {
+        return 1;
+    }
+    if (y3 == get_relief(x3) + 1)
+    {
+        return 1;
+    }
+    if (y3 == get_relief(x4) + 1)
+    {
+        return 1;
+    }
+
+    if (y4 == get_relief(x1) + 1)
+    {
+        return 1;
+    }
+    if (y4 == get_relief(x2) + 1)
+    {
+        return 1;
+    }
+    if (y4 == get_relief(x3) + 1)
+    {
+        return 1;
+    }
+    if (y4 == get_relief(x4) + 1)
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
-int figure_printer(t_figure block, int input, int level)
+int figure_printer(t_figure block, int input, int level, int colision_check)
 {
+    //mvprintw(10, 20, "%d", colision());
+    if (colision_check == 1)
+    {
+        // position_up = position_up - 2;
+        // exit(1);
+        return 0;
+    }
     //color pairs
     init_pair(1, COLOR_YELLOW, COLOR_YELLOW); //For O-Block
     init_pair(2, COLOR_CYAN, COLOR_CYAN);     // for I-BLOCK
@@ -156,11 +230,6 @@ int figure_printer(t_figure block, int input, int level)
         {
             ++position_up;
         }
-        // else if (colision == 1)
-        // {
-        //
-        //     return 0;
-        // }
         else
         {
             position_up = HEIGHT - 2;
@@ -181,6 +250,12 @@ int figure_printer(t_figure block, int input, int level)
         {
             position = position + 2;
         }
+    case 's':
+        if (position_up < HEIGHT - 2)
+        {
+            position_up++;
+        }
+
     default:
         break;
     }
@@ -296,10 +371,11 @@ int main()
     {
         int time_counter = 0;
         ch = getch();
-
+        int check = colision();
         playground();
 
-        random_checker = figure_printer(current_figure, ch, level_arr[level]);
+        mvprintw(20, 20, "%d", colision());
+        random_checker = figure_printer(current_figure, ch, level_arr[level], check);
         if (random_checker != 1)
         {
             bottom_adder(current_figure);
@@ -307,11 +383,10 @@ int main()
             current_figure = rnd_figure();
             position_up = 0;
             position = 0;
-            random_checker = figure_printer(current_figure, ch, level_arr[level]);
+            random_checker = figure_printer(current_figure, ch, level_arr[level], check);
         }
         bottom_printer();
 
-        mvprintw(10, 10, "%d", get_relief(1));
         while (time_counter <= 1)
         {
             usleep(10);
