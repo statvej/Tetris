@@ -4,18 +4,16 @@
 #include <stdbool.h>
 #define WIDTH 40
 #define HEIGHT 20
-// #define DROP_SPEED 1000000
+#define WIN_GAME 1
+#define LOSE_GAME 0
+#define MID_GAME 2
 int position = 0;
 int position_up = 0;
 int time_index = 0;
 int fig_count = 0;
 int level_arr[10] = {0, 10000, 90000, 70000, 80000, 70000, 6000, 50000, 40000, 3000};
-
-// typedef struct s_coord
-// {
-//     int x[19];
-//     int y[19];
-// } t_coord;
+int level_lim[10] = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90};
+int level = 2;
 
 typedef struct s_figure
 {
@@ -55,6 +53,7 @@ void playground()
     int count_h = 0;
 
     int count_f = 1;
+
     while (count_h < HEIGHT)
     {
         int count_w = 1;
@@ -76,38 +75,11 @@ void playground()
         ++count_f;
     }
     mvaddch(HEIGHT, WIDTH - 1, '/');
+    for (int i = 1; i < 39; i++)
+    {
+        mvaddch(3, i, '-');
+    }
 }
-
-// void get_relief()
-// {
-//     int count_w = 0;
-//     int count_h = 0;
-//     int ch = ' ';
-//     while (count_w < 38)
-//     {
-
-//         while (ch == ' ')
-//         {
-//             ch = mvinch(count_h, count_w + 1);
-//             if (ch == 'O')
-//             {
-
-//                 relief_y[count_w] = count_h - 2;
-//                 exit(0);
-//             }
-//             else if (ch == '_')
-//             {
-
-//                 relief_y[count_w] = count_h - 1;
-//             }
-
-//             count_h++;
-//             relief_y[count_w] = count_h - 2;
-//         }
-
-//         count_w++;
-//     }
-// }
 
 int get_relief(int count_w)
 {
@@ -250,12 +222,13 @@ int figure_printer(t_figure block, int input, int level, int colision_check)
         {
             position = position + 2;
         }
+        break;
     case 's':
         if (position_up < HEIGHT - 2)
         {
             position_up++;
         }
-
+        break;
     default:
         break;
     }
@@ -307,6 +280,22 @@ void bottom_printer()
     }
 }
 
+int win_lose_checker()
+{
+    if (level_lim[level] - fig_count == 0)
+    {
+        return WIN_GAME;
+    }
+    // for (int i = 0; i <= 40; i++)
+    // {
+    //     int lose_check = mvinch(7,i);
+    //    if(lose_check > 124){
+    //        return LOSE_GAME;
+    //    }
+    // }
+    return MID_GAME;
+}
+
 t_figure rnd_figure()
 {
     t_figure null_block; //NULL-BLOCK for error returning
@@ -356,7 +345,6 @@ int main()
     int ch;
     int random_checker;
 
-    int level = 1;
     t_figure temp;
 
     current_figure = rnd_figure();
@@ -372,6 +360,30 @@ int main()
         int time_counter = 0;
         ch = getch();
         int check = colision();
+        int game_status = win_lose_checker();
+        if (game_status != 2)
+        {
+            if (game_status == 0)
+            {
+
+                while (0 == 0)
+                {
+                    clear();
+                    mvprintw(10, 20, "YOU LOST :(");
+                    refresh();
+                }
+            }
+            else if (game_status == 1)
+            {
+                while (0 == 0)
+                {
+                    clear();
+                    mvprintw(10, 20, "YOU WON!!!");
+                    refresh();
+                }
+            }
+        }
+
         playground();
 
         mvprintw(20, 20, "%d", colision());
@@ -398,4 +410,3 @@ int main()
     endwin();
     return fig_count;
 }
-
