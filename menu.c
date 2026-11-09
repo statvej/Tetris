@@ -1,143 +1,87 @@
 #include <ncurses.h>
-#include <stdbool.h>
+#include <stdio.h>
 #define height 20
 #define start_y 17
 #define width 30
 #define start_x 45
-char up = '=';
-char side = '|';
-int x = 0;
-int i;
-int smth = 0;
-int counter = 0;
-int ishod_start = 0;
-int ishod_level = 1;
-int ishod_credits = 2;
-int ishod_quit = 3;
+
+enum { START, LEVEL, CREDITS, QUIT, N_OPTIONS };
+
+static void show_message(WINDOW *win, const char *msg)
+{
+    werase(win);
+    box(win, 0, 0);
+    mvwprintw(win, 1, 1, "%s", msg);
+    wrefresh(win);
+    wgetch(win);
+}
+
 int main()
 {
-
-    char *options[4] = {"Start", "Level", "Credits", "Quit"};
+    char *options[N_OPTIONS] = {"Start", "Level", "Credits", "Quit"};
+    int sel = START;
 
     initscr();
     cbreak();
     noecho();
-    if (has_colors() != true)
-    {
+    curs_set(0);
 
-        printw("Your terminal does not support colors");
+    if (LINES < start_y + height + 10 || COLS < start_x + width + 2)
+    {
+        endwin();
+        fputs("Terminal too small\n", stderr);
+        return 1;
     }
 
-    start_color();
-    init_pair(1, COLOR_MAGENTA, COLOR_CYAN);
-    init_pair(2, COLOR_BLACK, COLOR_BLACK);
-
-    WINDOW *win = newwin(height+10, width + 2, start_y, start_x);
-    refresh();
-
-    wborder(win, (int)side, (int)side, (int)up, (int)up, (int)up, (int)up, (int)up, (int)up);
-    nodelay(win, TRUE);
-    keypad(win, true);
-
-    wrefresh(win);
-
-    int choise = wgetch(win);
-
-    int c = wgetch(win);
-    int a = wgetch(win);
-    while (true)
+    int highlight = A_REVERSE;
+    if (has_colors())
     {
-        mvwprintw(win, i + 5, x + 11, options[i]);
-        while (1)
+        start_color();
+        init_pair(1, COLOR_MAGENTA, COLOR_CYAN);
+        highlight = COLOR_PAIR(1);
+    }
+
+    WINDOW *win = newwin(height + 10, width + 2, start_y, start_x);
+    keypad(win, TRUE);
+
+    while (1)
+    {
+        werase(win);
+        wborder(win, '|', '|', '=', '=', '=', '=', '=', '=');
+        for (int i = 0; i < N_OPTIONS; i++)
         {
-            for (i = 0; i < 4; i++)
+            if (i == sel)
+                wattron(win, highlight);
+            mvwprintw(win, i + 5, 11, "%s", options[i]);
+            wattroff(win, highlight);
+        }
+        wrefresh(win);
+
+        switch (wgetch(win))
+        {
+        case KEY_UP:
+            if (sel > 0)
+                sel--;
+            break;
+        case KEY_DOWN:
+            if (sel < N_OPTIONS - 1)
+                sel++;
+            break;
+        case 10:
+        case KEY_ENTER:
+            if (sel == START)
+                show_message(win, "the game has started"); // TODO: launch the game here
+            else if (sel == CREDITS)
+                show_message(win, "yarutiunov, fstaryk, hpinchuktr");
+            else if (sel == QUIT)
             {
-                if (i == smth)
-                {
-
-                    wattron(win, COLOR_PAIR(1));
-                    mvwprintw(win, i + 5, x + 11, options[i]);
-                    wattroff(win, COLOR_PAIR(1));
-                }
-
-                choise = wgetch(win);
-
-                switch (choise)
-                {
-
-                case KEY_UP:
-                    if (counter > 0)
-                    {
-
-                        counter = counter - 1;
-                    }
-                    smth--;
-                    break;
-
-                case KEY_DOWN:
-                    if (counter < 3)
-                    {
-
-                        counter = counter + 1;
-                    }
-
-                    smth++;
-                    break;
-
-                case 10:
-
-                    x = smth;
-                    if (ishod_start == smth)
-                    {
-
-                        while (1)
-                        {
-                           clear();
-                           refresh();
-                            mvwprintw(win, 1, 1, "the game has started");
-                            refresh();
-                            break;
-
-                            // ВЕСЬ ЭТОТ ПРИКОЛ ДОЛЖЕН ЗАПУСКАТЬ ИГРУ
-                        }
-                        break;
-                    }
-                    if (ishod_quit == smth)
-                    {
-
-                        
-                        
-                            exit(0);
-
-                            // ВЕСЬ ЭТОТ ПРИКОЛ ДОЛЖЕН ЗАПУСКАТЬ ИГРУ
-                        
-                    }
-                    if (ishod_credits == smth)
-                    {
-                        clear();
-                           refresh();
-                            mvwprintw(win, 1, 1, "yarutiunov, fstaryk, hpinchuktr");
-                            refresh();
-                            break;
-                            
-
-                            // ВЕСЬ ЭТОТ ПРИКОЛ ДОЛЖЕН ЗАПУСКАТЬ ИГРУ
-                    }
-                    
-                
-                }
-            }
-
-            if (choise == 27)
-            {
-
                 endwin();
                 return 0;
             }
-              
+            break;
+        case 27:
+            endwin();
+            return 0;
         }
-      endwin();
-    return 0;
     }
 }
-
