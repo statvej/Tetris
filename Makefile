@@ -2,8 +2,8 @@ CC ?= cc
 CFLAGS ?= -O2
 override CFLAGS += -Wall -Wextra -std=c11 -D_POSIX_C_SOURCE=200809L -Isrc
 
-CORE = src/game.c
-TESTS = tests/test_game
+CORE = src/game.c src/storage.c src/settings.c src/scores.c
+TESTS = tests/test_game tests/test_persistence
 
 tetris: tetris.c
 	$(CC) $(CFLAGS) -o $@ $< -lncurses
